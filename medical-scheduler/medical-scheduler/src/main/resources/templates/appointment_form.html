@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Programare Nouă</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+<body class="container mt-5">
+<div class="card shadow">
+    <div class="card-header bg-primary text-white"><h3>Formular Programare</h3></div>
+    <div class="card-body">
+        <!-- Mesaj eroare validare server-side -->
+        <div th:if="${formError}" class="alert alert-danger" role="alert" th:text="${formError}"></div>
+        <form th:action="@{/appointment/save}" method="post">
+
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">Prenume pacient</label>
+                    <input type="text" name="firstName" class="form-control" placeholder="Prenume" required
+                           minlength="2" maxlength="50"
+                           pattern="[A-Za-zĂÂÎȘȚăâîșț'’\- ]{2,50}"
+                           title="Doar litere, spațiu, cratimă sau apostrof (2–50 de caractere)"
+                           oninput="this.value=this.value.replace(/[^A-Za-zĂÂÎȘȚăâîșț'’\- ]/g,'')">
+                </div>
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">Nume pacient</label>
+                    <input type="text" name="lastName" class="form-control" placeholder="Nume" required
+                           minlength="2" maxlength="50"
+                           pattern="[A-Za-zĂÂÎȘȚăâîșț'’\- ]{2,50}"
+                           title="Doar litere, spațiu, cratimă sau apostrof (2–50 de caractere)"
+                           oninput="this.value=this.value.replace(/[^A-Za-zĂÂÎȘȚăâîșț'’\- ]/g,'')">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Vârstă</label>
+                    <input type="number" name="age" class="form-control" placeholder="Ani" required min="0" max="100" step="1"
+                           oninput="if(this.value){let v=parseInt(this.value); if(isNaN(v)) this.value=''; else this.value=Math.max(0,Math.min(100,v));}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Statut pacient (pentru tarifare)</label>
+                <select name="patientStatus" class="form-select" required>
+                    <option value="standard">Standard (Preț întreg)</option>
+                    <option value="insurance">Asigurat (0 RON)</option>
+                    <option value="student">Student (50% reducere)</option>
+                    <option value="emergency">Urgență (+20% taxă)</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label d-block">Specializare</label>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input spec-radio" type="radio" name="specialization" value="Cardiologie" id="cardio" required>
+                    <label class="form-check-label" for="cardio">Cardiologie</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input spec-radio" type="radio" name="specialization" value="Medicina generala" id="gen">
+                    <label class="form-check-label" for="gen">Medicină Generală</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input spec-radio" type="radio" name="specialization" value="Dermatologie" id="derm">
+                    <label class="form-check-label" for="derm">Dermatologie</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input spec-radio" type="radio" name="specialization" value="Pediatrie" id="ped">
+                    <label class="form-check-label" for="ped">Pediatrie</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input spec-radio" type="radio" name="specialization" value="Neurologie" id="neuro">
+                    <label class="form-check-label" for="neuro">Neurologie</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input spec-radio" type="radio" name="specialization" value="Ortopedie" id="orto">
+                    <label class="form-check-label" for="orto">Ortopedie</label>
+                </div>
+            </div>
+
+            <div id="protocolBox" class="card border-info mb-3" style="display:none;">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Instrucțiuni pentru pregătire
+                </div>
+                <div class="card-body">
+                    <p id="protocolText" class="card-text mb-0"></p>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Medic</label>
+                <select id="doctorSelect" name="doctorId" class="form-select" required>
+                    <option value="">Selectați mai întâi specializarea</option>
+                    <option th:each="doc : ${allDoctors}"
+                            th:value="${doc.id}"
+                            th:data-spec="${doc.specialization}"
+                            th:text="${doc.firstName + ' ' + doc.lastName}"
+                            class="doctor-option" style="display:none;"></option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Data</label>
+                    <input type="date" name="date" id="dateInput" class="form-control" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Interval Orar</label>
+                    <select name="time" class="form-select" required>
+                        <option value="09:00">09:00 - 09:30</option>
+                        <option value="09:30">09:30 - 10:00</option>
+                        <option value="10:00">10:00 - 10:30</option>
+                        <option value="10:30">10:30 - 11:00</option>
+                        <option value="11:00">11:00 - 11:30</option>
+                        <option value="11:30">11:30 - 12:00</option>
+                        <option value="12:00">12:00 - 12:30</option>
+                        <option value="12:30">12:30 - 13:00</option>
+                        <option value="13:00">13:00 - 13:30</option>
+                        <option value="13:30">13:30 - 14:00</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success">Confirmă Programarea</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const dateInput = document.getElementById('dateInput');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+
+    const radios = document.querySelectorAll('.spec-radio');
+    const options = document.querySelectorAll('.doctor-option');
+    const select = document.querySelector('#doctorSelect');
+    const box = document.getElementById('protocolBox');
+    const text = document.getElementById('protocolText');
+
+    function updateDoctorsAndProtocol(selectedSpec) {
+        select.value = "";
+        options.forEach(opt => {
+            if (opt.getAttribute('data-spec') === selectedSpec) {
+                opt.style.display = 'block';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+
+        fetch(`/protocol/instructions?specialization=${encodeURIComponent(selectedSpec)}`)
+            .then(resp => {
+                if (!resp.ok) throw new Error('Eroare server');
+                return resp.text();
+            })
+            .then(instructions => {
+                text.textContent = instructions || '—';
+                box.style.display = 'block';
+                box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            })
+            .catch(() => {
+                box.style.display = 'none';
+                text.textContent = '';
+            });
+    }
+
+    radios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            updateDoctorsAndProtocol(this.value);
+        });
+    });
+</script>
+</body>
+</html>
