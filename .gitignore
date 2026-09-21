@@ -1,0 +1,25 @@
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+
+# Build output
+target/
+build/
+*.class
+*.jar
+
+# H2 database files
+*.mv.db
+*.trace.db
+*.lock.db
+data/
+
+# OS
+.DS_Store
+Thumbs.db
